@@ -30,7 +30,6 @@
             position: relative;
         }
 
-        /* Верхние блоки со статистикой */
         .top-stats {
             display: flex;
             gap: 10px;
@@ -63,7 +62,6 @@
             font-weight: bold;
         }
 
-        /* Иконка монетки */
         .coin-icon {
             width: 22px;
             height: 22px;
@@ -78,7 +76,6 @@
             box-shadow: inset 0 0 5px rgba(255,255,255,0.6), 0 0 5px rgba(243,156,18,0.5);
         }
 
-        /* Главный баланс */
         .main-balance {
             display: flex;
             justify-content: center;
@@ -94,7 +91,6 @@
             font-size: 34px;
         }
 
-        /* Полоса уровня */
         .level-container {
             margin-bottom: 40px;
         }
@@ -122,7 +118,6 @@
             border-radius: 7px;
         }
 
-        /* Зона персонажа (Святика) */
         .character-area {
             flex: 1;
             display: flex;
@@ -131,7 +126,6 @@
             position: relative;
         }
         
-        /* Синий круг на фоне */
         .character-ring {
             width: 300px;
             height: 300px;
@@ -145,22 +139,20 @@
             position: relative;
         }
         
-        /* Сама картинка */
-        .character-img {
-            width: 85%;
-            height: 85%;
-            object-fit: contain;
+        .character-media {
+            width: 90%;
+            height: 90%;
+            object-fit: cover;
+            border-radius: 50%;
             cursor: pointer;
             z-index: 10;
             transition: transform 0.05s ease;
             touch-action: manipulation;
         }
-        /* Анимация при нажатии */
-        .character-img:active {
+        .character-media:active {
             transform: scale(0.92);
         }
 
-        /* Вылетающий текст +1 */
         .floating-text {
             position: absolute;
             color: white;
@@ -183,7 +175,6 @@
             }
         }
 
-        /* Нижний интерфейс (Энергия и меню) */
         .bottom-hud {
             margin-top: auto;
         }
@@ -200,7 +191,6 @@
             font-size: 24px;
         }
 
-        /* Навигация внизу */
         .navigation {
             display: flex;
             background-color: #272a33;
@@ -231,12 +221,8 @@
 </head>
 <body>
 
-<!-- Аудио с фоновой музыкой (загрузит твой music.mp3) -->
-<audio id="bg-music" src="music.mp3" loop preload="auto"></audio>
-
 <div class="app-container">
     
-    <!-- Шапка со статками -->
     <div class="top-stats">
         <div class="stat-box">
             <div class="stat-title">Прибыль за тап</div>
@@ -248,13 +234,11 @@
         </div>
     </div>
 
-    <!-- Общий баланс -->
     <div class="main-balance">
         <div class="coin-icon">$</div>
         <span id="score">42</span>
     </div>
 
-    <!-- Прогресс бар уровня -->
     <div class="level-container">
         <div class="level-text">
             <span>Начальный</span>
@@ -265,15 +249,13 @@
         </div>
     </div>
 
-    <!-- Зона клика по Святику -->
     <div class="character-area">
         <div class="character-ring">
-            <!-- Картинка Святика (загрузит твой svyatik.png) -->
-            <img src="svyatik.png" alt="Святик" class="character-img" id="svyatik-btn" draggable="false">
+            <!-- Видео запускается сразу, но без звука (muted) -->
+            <video src="svyatik.mp4" class="character-media" id="svyatik-btn" autoplay loop muted playsinline></video>
         </div>
     </div>
 
-    <!-- Нижняя часть -->
     <div class="bottom-hud">
         <div class="energy-bar">
             <span class="lightning">⚡</span>
@@ -299,66 +281,53 @@
 </div>
 
 <script>
-    let score = 42;          // Стартовый баланс как на скрине
-    let energy = 100;        // Текущая энергия
-    const maxEnergy = 100;   // Максимальная энергия
-    let musicStarted = false;
+    let score = 42;
+    let energy = 100;
+    const maxEnergy = 100;
 
     const scoreElement = document.getElementById('score');
     const energyElement = document.getElementById('energy');
     const svyatikBtn = document.getElementById('svyatik-btn');
-    const bgMusic = document.getElementById('bg-music');
 
-    // Функция обработки клика по Святику (срабатывает быстро и поддерживает телефоны)
     svyatikBtn.addEventListener('pointerdown', function(e) {
-        // При первом клике запускаем музыку
-        if (!musicStarted) {
-            bgMusic.play().catch(err => console.log("Музыка не найдена, либо заблокирована браузером"));
-            musicStarted = true;
+        // При первом клике снимаем мут с видео, чтобы пошел звук
+        if (svyatikBtn.muted) {
+            svyatikBtn.muted = false;
         }
 
-        // Если есть энергия — зачисляем монеты
         if (energy > 0) {
             score++;
             energy--;
             
-            // Обновляем цифры на экране
             scoreElement.innerText = score;
             energyElement.innerText = `${energy}/${maxEnergy}`;
 
-            // Рисуем вылетающую +1
             showFloatingText(e);
             
-            // Если играем с телефона, добавляем легкую вибрацию
             if (navigator.vibrate) {
                 navigator.vibrate(40);
             }
         }
     });
 
-    // Функция создания красивой вылетающей цифры +1
     function showFloatingText(e) {
         const floatDiv = document.createElement('div');
         floatDiv.classList.add('floating-text');
         floatDiv.innerText = '+1';
 
-        // Определяем место клика
         let x = e.clientX;
         let y = e.clientY;
         
-        // Корректируем координаты, чтобы текст летел прямо из-под пальца/курсора
         floatDiv.style.left = `${x - 20}px`;
         floatDiv.style.top = `${y - 40}px`;
 
         document.body.appendChild(floatDiv);
 
-        // Удаляем цифру из памяти после того, как анимация закончилась
         setTimeout(() => {
             floatDiv.remove();
         }, 1000);
     }
 
-    // Автоматическое восстановление энергии (1 энергия в секунду)
     setInterval(() => {
         if (energy < maxEnergy) {
             energy++;
